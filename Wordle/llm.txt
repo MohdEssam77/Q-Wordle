@@ -1,0 +1,133 @@
+Used Chat GPT to help me in understanding the project description file. The file was not written well at all (for me).
+After understanding the overview, I dived into the details of the tasks and the functions I have to implement with the help of Chat GPT as well.
+I will give the prompts I gave to Chat GPT (of course, there was follow up questions and longer chat between us to fix errors).
+When getting errors or after finishing and passing all the public tests, I failed some daily tests in the leaderboard so I got help from Cody - AI coding assistant (extension in VS Code).
+
+Chat GPT:
+I attached the project description. Your job now is to read the PDF, understand it and then help me doing the tasks.
+No need to write any code now!
+
+What I got:
+🎯 Project Overview
+You are implementing a C version of the Wordle game (plus a Quantum version). It includes:
+
+A Trie to store and look up dictionary words efficiently.
+
+Classic Wordle Game Logic, including feedback generation.
+
+Quantum Wordle Extension, where two disjoint-character words represent a quantum state.
+
+Code style and memory safety are essential for full points.
+
+Testing and Debugging using tools like valgrind, ASAN, and UBSAN.
+
+✅ Tasks Breakdown
+1. Trie Implementation (5 Points)
+Implement:
+
+create() – Initializes an empty trie.
+
+insert(Trie*, char*) – Adds a word.
+
+lookup(Trie*, char*) – Checks if a word exists.
+
+destroy(Trie*) – Frees all memory.
+
+Use this for fast dictionary word validation.
+
+2. Basic Wordle (6 Points)
+Implement:
+
+generateDict() – Loads words from a file into a trie and randomly selects a word using drand48().
+
+guess() – Prompts user input until a valid word is entered.
+
+getFeedback() – Returns array of feedback (CORRECT, WRONGPOS, WRONG).
+
+printFeedback() – Prints emojis for feedback (green, yellow, gray squares).
+
+checkWin() – Determines if all letters are CORRECT.
+
+Game loop runs in main().
+
+3. Quantum Wordle (3 Points)
+Two disjoint-character words form the secret.
+
+Feedback is slightly different with circle emojis for quantum feedback.
+
+Extend feedback generation and dictionary selection to handle dual-word states.
+
+4. Code Style (1 Point)
+Proper formatting, indentation, comments, and avoiding repetition.
+
+🧪 Testing and Running
+Build: make
+
+Run game: bin/wordle_debug [word_length] [dictionary_path]
+
+Run tests: make check or specific: test/run_tests.py -t "public.trie.lookup"
+
+Then follow up questions
+
+
+Cody:
+I got the following error, can you help me fixing it.
+src/main.c: In function ‘main’:
+src/main.c:19:38: error: implicit declaration of function ‘strcmp’ [-Wimplicit-function-declaration]
+   19 |     bool quantum_mode = (argc > 3 && strcmp(argv[3], "--quantum") == 0);
+      |                                      ^~~~~~
+src/main.c:7:1: note: include ‘<string.h>’ or provide a declaration of ‘strcmp’
+    6 | #include "wordle.h"
+  +++ |+#include <string.h>
+    7 | 
+src/wordle.c:11:13: warning: ‘hasDisjointCharacters’ defined but not used [-Wunused-function]
+   11 | static bool hasDisjointCharacters(char *word1, char *word2, int k) {
+      |             ^~~~~~~~~~~~~~~~~~~~~
+make: *** [Makefile:43: bin/wordle_opt] Error 1
+
+What I got:
+Add #include <string.h> to src/main.c to fix the strcmp implicit declaration error
+Add #include <stdbool.h> to src/main.c for the bool type
+
+FAIL: splint found warnings.
+    stdout:
+      src/trie.c: (in function insert)
+      src/trie.c:49:24: Function returns with possibly null storage derivable from
+                           parameter trie->root->children[]
+        A possibly null pointer is reachable from a parameter or global variable that
+        is not declared using a /*@null@*/ annotation. (Use -nullstate to inhibit
+        warning)
+         src/trie.c:47:40: Storage trie->root->children[] may become null
+      src/trie.c:58:30: Storage trie->root->children[] reachable from parameter is
+                           dependent (should be unqualified)
+        Storage derivable from a parameter does not match the alias kind expected for
+        the formal parameter. (Use -compmempass to inhibit warning)
+         src/trie.c:57:9: Storage trie->root->children[] becomes dependent
+      src/trie.c:58:30: Function returns with possibly null storage derivable from
+                           parameter trie->root->children[]
+         src/trie.c:47:40: Storage trie->root->children[] may become null
+      src/wordle.c: (in function generateDict)
+      src/wordle.c:67:35: Variable words used after being released
+        Memory is used after it has been released (either by passing as an only param
+        or assigning to an only global). (Use -usereleased to inhibit warning)
+         src/wordle.c:65:39: Storage words released
+      src/wordle.c:77:31: Possibly null storage words[] derivable from parameter
+                             freeWordArray (words, ...)
+         src/wordle.c:75:33: Storage words[] may become null
+
+
+    stderr:
+      Splint 3.1.2a --- Mar 29 2023
+
+      Finished checking --- 5 code warnings
+
+
+Failing ❌check_quantum_qcorrect test. I will give you a chat between 2 other students facing the same problem, it might help you solving the error
+Hi,
+in my first attempt at the checkWin function, I only checked whether the feedback array consists entirely of CORRECT. With this version, I passed the test check_quantum_qcorrect
+However, if I understand the project description correctly, a player should also win the game if the feedback array consists entirely of QUANTUMCORRECT. But when I added a check for QUANTUMCORRECT, my test started failing.
+Am I misunderstanding the winning condition, or is there another error in my implementation?
+
+If all are quantum correct there are letter occurrences from both word. So not from the same word. So you didn’t guess any of the two words correctly.
+
+(Here the problem was in checkWin function and I was trying to change getFeedback function, but then everything was solved!)
